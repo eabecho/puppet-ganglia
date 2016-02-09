@@ -59,7 +59,7 @@ udp_send_channel {
 <% end -%>
 <% end -%>
 /* You can specify as many udp_recv_channels as you like as well. */
-<% unless @udp_recv_channel -%>
+<% if @udp_recv_channel -%>
 <% @udp_recv_channel.each do |channel| -%>
 udp_recv_channel {
   <%- if channel['mcast_join'] then -%>

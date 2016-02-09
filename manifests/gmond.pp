@@ -17,6 +17,9 @@ class ganglia::gmond (
     { mcast_join => '239.2.11.71', port => 8649, bind => '239.2.11.71' }
   ],
   $tcp_accept_channel             = [ { port => 8659 } ],
+  $gmond_package_name             = $::ganglia::params::gmond_package_name,
+  $gmond_service_name             = $::ganglia::params::gmond_service_name,
+  $gmond_service_config           = $::ganglia::params::gmond_service_config,
 ) inherits ganglia::params {
   validate_string($globals_deaf)
   validate_string($globals_host_dmax)
@@ -32,6 +35,9 @@ class ganglia::gmond (
   validate_array($udp_send_channel)
   validate_array($udp_recv_channel)
   validate_array($tcp_accept_channel)
+  validate_string($gmond_package_name)
+  validate_string($gmond_service_name)
+  validate_string($gmond_service_config)
 
   if ($::ganglia::params::gmond_status_command) {
     $hasstatus = false
@@ -40,29 +46,29 @@ class ganglia::gmond (
   }
 
   if versioncmp($::puppetversion, '3.6.0') > 0 {
-    package { $::ganglia::params::gmond_package_name:
+    package { $gmond_package_name:
       ensure        => present,
       allow_virtual => false,
     }
   } else {
-    package { $::ganglia::params::gmond_package_name:
+    package { $gmond_package_name:
       ensure => present,
     }
   }
 
-  Package[$::ganglia::params::gmond_package_name] ->
-  file { $::ganglia::params::gmond_service_config:
+  Package[$gmond_package_name] ->
+  file { $gmond_service_config:
     ensure  => present,
     owner   => 'root',
     group   => 'root',
     mode    => '0644',
     content => template($::ganglia::params::gmond_service_erb),
   } ~>
-  service { $::ganglia::params::gmond_service_name:
+  service { $gmond_service_name:
     ensure     => running,
     hasstatus  => $hasstatus,
     hasrestart => true,
     enable     => true,
-    status     => $::ganglia::params::gmond_status_command,
+    status     => $gmond_status_command,
   }
 }
